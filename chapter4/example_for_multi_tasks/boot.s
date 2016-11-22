@@ -14,12 +14,12 @@
 !从外存上载代码到内存中需要借助BIOS提供的中断，而中断的入口就在前0x100处，如果被覆盖，则
 !肯定会出错，等把自己的代码完全加载到内存后就可以建立新的"秩序"了。
 
-BOOTSET = 0x07c0
+BOOTSEG = 0x07c0
 SYSSEG = 0x1000
 SYSLEN = 17     !内核占用的最大磁盘扇区数目17*512字节
 entry start
 start:
-        jmpi    go,#BOOTSET  !段间跳转到0x7c0:go，
+        jmpi    go,#BOOTSEG  !段间跳转到0x7c0:go，
                              !经过CPU内部计算发出到地址总线上的还是一样的，
                              !只是更新了内部寄存器的值
 go:
@@ -43,14 +43,15 @@ die:    jmp     die
 !而后把代码移动到内存0开始处，总共移动8K字节(内核长度不超过8K,17*512)
 ok_load:
         cli                  !先关闭中断，防止打扰
-        mov     ax,#SYSSEC   !移动开始位置DS:SI=0x1000:0;目的位置ES:DI=0:0,利用串操作指令循环
+        mov     ax,#SYSSEG   !移动开始位置DS:SI=0x1000:0;目的位置ES:DI=0:0,利用串操作指令循环
         mov     ds,ax
         xor     ax,ax
         mov     es,ax
         mov     cx,#0x1000   !每次移动一个word,总计4K次，也可以换其他指令,但由于在16位的实模式下限制了16位数据长度
         sub     si,si        !不可能用更慢的8位吧...
         sub     di,di
-        rep     movw
+        rep
+        movw
 
 !加载IDT和GDT到各自寄存器，变量的定义在后面
         mov     ax,#BOOTSEG
