@@ -2,7 +2,7 @@
 
 Image: boot system
 	dd bs=32 if=boot of=Image skip=1
-	dd bs=1 if=system of=Image skip=4096 seek=512
+	dd bs=1 if=system of=Image skip=4096 seek=512   #必须指出这里的错误，skip偏移量是0x1000，不是1024
 
 boot: boot.o
 	ld86 -0 -s -o $@ $<
