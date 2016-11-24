@@ -12,7 +12,7 @@
 !method:
 ![/root]# as86 -0 -a -o boot.o boot.s    #编译
 ![/root]# ld86 -0 -s -o boot boot.o      #链接
-![/root]# dd bs=32 if=boot of=/dev/fd0 skip1   #写入软盘或者image文件
+![/root]# dd bs=32 if=boot of=/dev/fd0 skip=1   #写入软盘或者image文件,跳过文件头
 !==================================================================
 !
 !
