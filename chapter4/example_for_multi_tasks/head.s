@@ -20,8 +20,8 @@ LDT0_SEL  = 0x28        #任务0的LDT段选择子
 TSS1_SEL  = 0x30        #任务1的TSS段选择子
 LDT1_SEL  = 0x38        #任务1的LDT段选择子
 
-TSS2_SEL  = 0x40
-LDT2_SEL  = 0x48
+TSS2_SEL  = 0x40        #任务2的TSS段选择子
+LDT2_SEL  = 0x48        #任务2的LDT段选择子
 
 .code32
 .text
