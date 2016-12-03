@@ -20,6 +20,9 @@ LDT0_SEL  = 0x28        #任务0的LDT段选择子
 TSS1_SEL  = 0x30        #任务1的TSS段选择子
 LDT1_SEL  = 0x38        #任务1的LDT段选择子
 
+TSS2_SEL  = 0x40
+LDT2_SEL  = 0x48
+
 .code32
 .text
 .globl startup_32,scr_loc
@@ -146,16 +149,22 @@ timer_interrupt:
         movl    $0x10,%eax      #让ds指向内核数据段
         mov     %ax,%ds
         movb    $0x20,%al
-        outb    %al,$0x20
+        outb    %al,$0x20       #给中断芯片发通知
+        mov     $1, %eax         /*循环从任务0,任务1,任务2之间跳转执行*/
         cmpl    %eax,current
-        je      1f
-        movl    %eax,current
-        ljmp    $TSS1_SEL,$0    #象征性的偏移量
-        jmp     2f
-1:
+        je      2f
+        jl      1f
         movl    $0,current
-        ljmp    $TSS0_SEL,$0
+        ljmp    $TSS1_SEL,$0    #象征性的偏移量
+        jmp     3f
+1:
+        movl    $1,current
+        ljmp    $TSS2_SEL,$0
+        jmp     3f
 2:
+        movl    $2,current
+        ljmp    $TSS0_SEL,$0
+3:
         popl    %eax            #其实这里根本执行不到的...,所以上述的push会一直使得栈指针下滑，会出问题???
         pop     %ds
         iret
@@ -239,6 +248,8 @@ gdt:
         .word   0x40, ldt0, 0xe200, 0x0
         .word   0x68, tss1, 0xe900, 0x0
         .word   0x40, ldt1, 0xe200, 0x0
+        .word   0x68, tss2, 0xe900, 0x0    #自己定义的第三个任务
+        .word   0x40, ldt2, 0xe200, 0x0
 end_gdt:
         .fill   128,4,0       #初始化内核堆栈空间
 init_stack:
@@ -253,7 +264,7 @@ tss0:
         .long   0                     #back link
         .long   krn_stk0,0x10         #esp0,ss0
         .long   0,0,0,0,0             #esp1,ss1,esp2,ss2,cr3
-        .long   0,0,0,0,0             #eip,eflags,eax,ecs,edx
+        .long   0,0,0,0,0             #eip,eflags,eax,ecx,edx
         .long   0,0,0,0,0             #ebx,esp,ebp,esi,edi,其中esp由iret指令返回被CPU自动写入
         .long   0,0,0,0,0,0           #es,cs,ss,ds,fs,gs
         .long   LDT0_SEL,0x8000000    #ldt,trace bitmap
@@ -270,13 +281,29 @@ tss1:
         .long   0                                 #back link
         .long   krn_stk1,0x10                     #esp0,ss0
         .long   0,0,0,0,0                         #esp1,ss1,esp2,ss2,cr3
-        .long   task1,0x200,0,0,0                 #eip,eflags,eax,ecs,edx
+        .long   task1,0x200,0,0,0                 #eip,eflags,eax,ecx,edx
         .long   0,usr_stk1,0,0,0                  #ebx,esp,ebp,esi,edi
         .long   0x17,0x0f,0x17,0x17,0x17,0x17     #es,cs,ss,ds,fs,gs
         .long   LDT1_SEL,0x8000000    #ldt,trace bitmap
         .fill   128,4,0               #任务1的内核栈空间
 krn_stk1:
 
+#任务2
+.align 8
+ldt2:
+        #.quad 0x0000000000000000  我来用上首个局部段
+        .quad  0x00c0fa00000003ff
+        .quad  0x00c0f200000003ff
+tss2:
+        .long 0
+        .long krn_stk2,0x10
+        .long 0,0,0,0,0
+        .long task2,0x200,0,0,0
+        .long 0,usr_stk2,0,0,0
+        .long 0x0f,0x07,0x0f,0x0f,0x0f,0x0f  #因为用了第一个局部段描述符，因此选择子得改变
+        .long LDT2_SEL,0x8000000             #全局描述符表中定义
+        .fill 128,4,0
+krn_stk2:
 
 task0:
         movl    $0x17,%eax
@@ -295,3 +322,16 @@ task1:
 
         .fill   128,4,0         #任务1用户空间
 usr_stk1:
+
+
+#添加一个任务2玩玩，就打印'0'吧
+#照葫芦画瓢~~~
+task2:
+        mov     $0x30,%al
+        int     $0x80
+        movl    $0xfff,%ecx    #不能忘记$符号，否则gcc编译器认为是取0xfff地址处的4字节值
+1:      loop    1b
+        jmp     task2
+
+        .fill   128,4,0
+usr_stk2:

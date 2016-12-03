@@ -71,15 +71,15 @@ LOAD head.o
 .plt.got
  *(.plt.got)
 
-.text           0x0000000000000000     0x12f9
+.text           0x0000000000000000     0x17ae
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
  *(.text.hot .text.hot.*)
  *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0x0000000000000000     0x12f9 head.o
+ .text          0x0000000000000000     0x17ae head.o
                 0x0000000000000000                startup_32
-                0x000000000000017f                scr_loc
+                0x000000000000019f                scr_loc
  *(.gnu.warning)
 
 .fini
@@ -110,7 +110,7 @@ LOAD head.o
 
 .exception_ranges
  *(.exception_ranges .exception_ranges*)
-                0x00000000000022f9                . = DATA_SEGMENT_ALIGN (0x1000, 0x1000)
+                0x00000000000027ae                . = DATA_SEGMENT_ALIGN (0x1000, 0x1000)
 
 .eh_frame
  *(.eh_frame)
@@ -132,18 +132,18 @@ LOAD head.o
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0x00000000000022f9        0x0
+.preinit_array  0x00000000000027ae        0x0
                 [!provide]                        PROVIDE (__preinit_array_start, .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end, .)
 
-.init_array     0x00000000000022f9        0x0
+.init_array     0x00000000000027ae        0x0
                 [!provide]                        PROVIDE (__init_array_start, .)
  *(SORT(.init_array.*) SORT(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
                 [!provide]                        PROVIDE (__init_array_end, .)
 
-.fini_array     0x00000000000022f9        0x0
+.fini_array     0x00000000000027ae        0x0
                 [!provide]                        PROVIDE (__fini_array_start, .)
  *(SORT(.fini_array.*) SORT(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -176,36 +176,36 @@ LOAD head.o
 .got
  *(.got)
  *(.igot)
-                0x00000000000022f9                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
+                0x00000000000027ae                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
 
-.got.plt        0x00000000000022fc        0x0
+.got.plt        0x00000000000027b0        0x0
  *(.got.plt)
  *(.igot.plt)
- .igot.plt      0x00000000000022fc        0x0 head.o
+ .igot.plt      0x00000000000027b0        0x0 head.o
 
-.data           0x00000000000022f9        0x0
+.data           0x00000000000027ae        0x0
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x00000000000022f9        0x0 head.o
+ .data          0x00000000000027ae        0x0 head.o
 
 .data1
  *(.data1)
-                0x00000000000022f9                _edata = .
+                0x00000000000027ae                _edata = .
                 [!provide]                        PROVIDE (edata, .)
-                0x00000000000022f9                . = .
-                0x00000000000022f9                __bss_start = .
+                0x00000000000027ae                . = .
+                0x00000000000027ae                __bss_start = .
 
-.bss            0x00000000000022f9        0x0
+.bss            0x00000000000027ae        0x0
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x00000000000022f9        0x0 head.o
+ .bss           0x00000000000027ae        0x0 head.o
  *(COMMON)
-                0x00000000000022f9                . = ALIGN ((. != 0x0)?0x4:0x1)
-                0x00000000000022fc                . = ALIGN (0x4)
-                0x00000000000022fc                . = SEGMENT_START ("ldata-segment", .)
-                0x00000000000022fc                . = ALIGN (0x4)
-                0x00000000000022fc                _end = .
+                0x00000000000027ae                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x00000000000027b0                . = ALIGN (0x4)
+                0x00000000000027b0                . = SEGMENT_START ("ldata-segment", .)
+                0x00000000000027b0                . = ALIGN (0x4)
+                0x00000000000027b0                _end = .
                 [!provide]                        PROVIDE (end, .)
-                0x00000000000022fc                . = DATA_SEGMENT_END (.)
+                0x00000000000027b0                . = DATA_SEGMENT_END (.)
 
 .stab
  *(.stab)
